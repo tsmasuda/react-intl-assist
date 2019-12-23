@@ -1,33 +1,56 @@
 import React, { Component } from "react";
 import copy from "copy-to-clipboard";
-import { TextField } from "@material-ui/core";
-import { Button } from "@material-ui/core";
-import { Typography } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
+import {
+  Grid,
+  TextField,
+  Button,
+  ButtonGroup,
+  Typography
+} from "@material-ui/core";
+import { camelCase, paramCase } from "change-case";
+import empty from "is-empty";
 
-function formatMessage(message) {
-  return `"${message.key}": "${message.value}",`;
+function createMessageObject(packageName, componentName, defaultMessage) {
+  const trimedMessage = defaultMessage.replace(/\s+/g, " ").replace(/\s$/g, "");
+  return {
+    key: camelCase(trimedMessage),
+    id: `${packageName}.${paramCase(componentName)}.${trimedMessage}`,
+    defaultMessage: trimedMessage
+  };
+}
+
+function copyJS(messageObject) {
+  const formatObject = `
+    ${messageObject.key}: {
+      "id": "${messageObject.id}",
+      "defaultMessage": "${messageObject.defaultMessage}"
+    },`;
+  copy(formatObject);
+}
+
+function copyJSON(messageObject) {
+  const formatObject = `
+    "id": "${messageObject.id}",
+    "defaultMessage": "${messageObject.defaultMessage}"`;
+  copy(formatObject);
+}
+
+function copyJSX(messageObject) {
+  const formatObject = `
+    <FormattedMessage
+      id="${messageObject.key}"
+      defaultMessage={messages.${messageObject.key}}
+      value={}
+    />`;
+  copy(formatObject);
 }
 
 class App extends Component {
   state = {
-    keys: [],
-    packageForKey: "",
-    pageForKey: "",
-    valueForKey: ""
-  };
-
-  copyText = message => {
-    copy(formatMessage(message));
-  };
-
-  disableAddButton = () => {
-    const { packageForKey, pageForKey, valueForKey } = this.state;
-    return (
-      packageForKey.length === 0 &&
-      pageForKey.length === 0 &&
-      valueForKey.length === 0
-    );
+    messageObjects: [],
+    packageName: "",
+    componentName: "",
+    defaultMessage: ""
   };
 
   handleChange = ({ target: { id, value } }) => {
@@ -37,20 +60,26 @@ class App extends Component {
   };
 
   handleAddClick = () => {
-    const { keys, packageForKey, pageForKey, valueForKey } = this.state;
+    const {
+      messageObjects,
+      packageName,
+      componentName,
+      defaultMessage
+    } = this.state;
 
-    // todo: remove all double quote, single quote
-    // todo: replace double spaces to be one space
-    // todo: shorten the display key if too long
-    const key = `${packageForKey}.${pageForKey}.${valueForKey}`;
+    const messageObject = createMessageObject(
+      packageName,
+      componentName,
+      defaultMessage
+    );
 
-    // todo: escape all double quote, single quote
-    // todo: shorten the display key if too long
-    const value = `${valueForKey}`;
+    messageObjects.push(messageObject);
+    this.setState({ messageObjects, defaultMessage: "" });
+  };
 
-    keys.push({ key, value });
-
-    this.setState({ keys, valueForKey: "" });
+  isDisabled = () => {
+    const { packageName, componentName, defaultMessage } = this.state;
+    return empty(packageName) || empty(componentName) || empty(defaultMessage);
   };
 
   render() {
@@ -64,11 +93,11 @@ class App extends Component {
           <Grid item xs={12} sm={6}>
             <TextField
               required
-              id="packageForKey"
-              name="packageForKey"
-              label="Package"
+              id="packageName"
+              name="packageName"
+              label="Package Name"
               fullWidth
-              value={this.state.packageForKey}
+              value={this.state.packageName}
               onChange={this.handleChange}
               variant="outlined"
             />
@@ -76,11 +105,11 @@ class App extends Component {
           <Grid item xs={12} sm={6}>
             <TextField
               required
-              id="pageForKey"
-              name="pageForKey"
-              label="Page"
+              id="componentName"
+              name="componentName"
+              label="Component Name"
               fullWidth
-              value={this.state.pageForKey}
+              value={this.state.componentName}
               onChange={this.handleChange}
               variant="outlined"
             />
@@ -88,12 +117,12 @@ class App extends Component {
           <Grid item xs={12} sm={6}>
             <TextField
               required
-              id="valueForKey"
-              name="valueForKey"
-              label="Translation Value"
+              id="defaultMessage"
+              name="defaultMessage"
+              label="Default Message"
               multiline
               fullWidth
-              value={this.state.valueForKey}
+              value={this.state.defaultMessage}
               onChange={this.handleChange}
               variant="outlined"
             />
@@ -106,6 +135,7 @@ class App extends Component {
               color="primary"
               onClick={this.handleAddClick}
               variant="contained"
+              disabled={this.isDisabled()}
             >
               Add
             </Button>
@@ -113,21 +143,20 @@ class App extends Component {
         </Grid>
 
         <Grid container spacing={3}>
-          {this.state.keys.map((message, index) => {
+          {this.state.messageObjects.map((messageObject, index) => {
             return (
               <React.Fragment key={index}>
-                <Grid item xs={12} sm={11}>
-                  {formatMessage(message)}
+                <Grid item xs={12} sm={8}>
+                  {messageObject.defaultMessage}
                 </Grid>
-                <Grid item xs={12} sm={1}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    onClick={this.copyText(message)}
-                  >
-                    Copy
-                  </Button>
+                <Grid item xs={12} sm={4}>
+                  <ButtonGroup variant="contained" color="primary">
+                    <Button onClick={() => copyJS(messageObject)}>JS</Button>
+                    <Button onClick={() => copyJSON(messageObject)}>
+                      JSON
+                    </Button>
+                    <Button onClick={() => copyJSX(messageObject)}>JSX</Button>
+                  </ButtonGroup>
                 </Grid>
               </React.Fragment>
             );
