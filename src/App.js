@@ -19,30 +19,47 @@ function createMessageObject(packageName, componentName, defaultMessage) {
   };
 }
 
-function copyJS(messageObject) {
-  const formatObject = `
+function copyToClipboard(messageObjects, format) {
+  let copyObject = "";
+
+  switch (format) {
+    case "JS":
+      copyObject = messageObjects.map(getJs);
+      break;
+    case "JSON":
+      copyObject = messageObjects.map(getJson);
+      break;
+    case "JSX":
+      copyObject = messageObjects.map(getJsx);
+      break;
+    default:
+      break;
+  }
+
+  copy(copyObject);
+}
+
+function getJs(messageObject) {
+  return `
     ${messageObject.key}: {
       "id": "${messageObject.id}",
       "defaultMessage": "${messageObject.defaultMessage}"
     },`;
-  copy(formatObject);
 }
 
-function copyJSON(messageObject) {
-  const formatObject = `
+function getJson(messageObject) {
+  return `
     "id": "${messageObject.id}",
     "defaultMessage": "${messageObject.defaultMessage}"`;
-  copy(formatObject);
 }
 
-function copyJSX(messageObject) {
-  const formatObject = `
+function getJsx(messageObject) {
+  return `
     <FormattedMessage
       id="${messageObject.key}"
       defaultMessage={messages.${messageObject.key}}
       value={}
     />`;
-  copy(formatObject);
 }
 
 class App extends Component {
@@ -143,6 +160,30 @@ class App extends Component {
         </Grid>
 
         <Grid container spacing={3}>
+          <Grid item xx={12} sm={8}></Grid>
+          <Grid item xx={12} sm={4}>
+            <ButtonGroup variant="contained" color="primary">
+              <Button
+                onClick={() => copyToClipboard(this.state.messageObjects, "JS")}
+              >
+                JS (ALL)
+              </Button>
+              <Button
+                onClick={() =>
+                  copyToClipboard(this.state.messageObjects, "JSON")
+                }
+              >
+                JSON (ALL)
+              </Button>
+              <Button
+                onClick={() =>
+                  copyToClipboard(this.state.messageObjects, "JSX")
+                }
+              >
+                JSX (ALL)
+              </Button>
+            </ButtonGroup>
+          </Grid>
           {this.state.messageObjects.map((messageObject, index) => {
             return (
               <React.Fragment key={index}>
@@ -150,12 +191,22 @@ class App extends Component {
                   {messageObject.defaultMessage}
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <ButtonGroup variant="contained" color="primary">
-                    <Button onClick={() => copyJS(messageObject)}>JS</Button>
-                    <Button onClick={() => copyJSON(messageObject)}>
+                  <ButtonGroup variant="contained" color="secondary">
+                    <Button
+                      onClick={() => copyToClipboard([messageObject], "JS")}
+                    >
+                      JS
+                    </Button>
+                    <Button
+                      onClick={() => copyToClipboard([messageObject], "JSON")}
+                    >
                       JSON
                     </Button>
-                    <Button onClick={() => copyJSX(messageObject)}>JSX</Button>
+                    <Button
+                      onClick={() => copyToClipboard([messageObject], "JSX")}
+                    >
+                      JSX
+                    </Button>
                   </ButtonGroup>
                 </Grid>
               </React.Fragment>
