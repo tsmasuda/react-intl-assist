@@ -1,17 +1,17 @@
-import React, { Component } from "react";
-import copy from "copy-to-clipboard";
+import React, { Component } from 'react';
+import copy from 'copy-to-clipboard';
 import {
   Grid,
   TextField,
   Button,
   ButtonGroup,
   Typography
-} from "@material-ui/core";
-import { camelCase, paramCase } from "change-case";
-import empty from "is-empty";
+} from '@material-ui/core';
+import { camelCase, paramCase } from 'change-case';
+import empty from 'is-empty';
 
 function createMessageObject(packageName, componentName, defaultMessage) {
-  const trimedMessage = defaultMessage.replace(/\s+/g, " ").replace(/\s$/g, "");
+  const trimedMessage = defaultMessage.replace(/\s+/g, ' ').replace(/\s$/g, '');
   return {
     key: camelCase(trimedMessage),
     id: `${packageName}.${paramCase(componentName)}.${trimedMessage}`,
@@ -20,16 +20,16 @@ function createMessageObject(packageName, componentName, defaultMessage) {
 }
 
 function copyToClipboard(messageObjects, format) {
-  let copyObject = "";
+  let copyObject = '';
 
   switch (format) {
-    case "JS":
+    case 'JS':
       copyObject = messageObjects.map(getJs);
       break;
-    case "JSON":
+    case 'JSON':
       copyObject = messageObjects.map(getJson);
       break;
-    case "JSX":
+    case 'JSX':
       copyObject = messageObjects.map(getJsx);
       break;
     default:
@@ -44,7 +44,7 @@ function getJs(messageObject) {
     ${messageObject.key}: {
       "id": "${messageObject.id}",
       "defaultMessage": "${messageObject.defaultMessage}"
-    },`;
+    }`;
 }
 
 function getJson(messageObject) {
@@ -65,9 +65,9 @@ function getJsx(messageObject) {
 class App extends Component {
   state = {
     messageObjects: [],
-    packageName: "",
-    componentName: "",
-    defaultMessage: ""
+    packageName: '',
+    componentName: '',
+    defaultMessage: ''
   };
 
   handleChange = ({ target: { id, value } }) => {
@@ -91,7 +91,7 @@ class App extends Component {
     );
 
     messageObjects.push(messageObject);
-    this.setState({ messageObjects, defaultMessage: "" });
+    this.setState({ messageObjects, defaultMessage: '' });
   };
 
   isDisabled = () => {
@@ -164,20 +164,20 @@ class App extends Component {
           <Grid item xx={12} sm={4}>
             <ButtonGroup variant="contained" color="primary">
               <Button
-                onClick={() => copyToClipboard(this.state.messageObjects, "JS")}
+                onClick={() => copyToClipboard(this.state.messageObjects, 'JS')}
               >
                 JS (ALL)
               </Button>
               <Button
                 onClick={() =>
-                  copyToClipboard(this.state.messageObjects, "JSON")
+                  copyToClipboard(this.state.messageObjects, 'JSON')
                 }
               >
                 JSON (ALL)
               </Button>
               <Button
                 onClick={() =>
-                  copyToClipboard(this.state.messageObjects, "JSX")
+                  copyToClipboard(this.state.messageObjects, 'JSX')
                 }
               >
                 JSX (ALL)
@@ -193,17 +193,17 @@ class App extends Component {
                 <Grid item xs={12} sm={4}>
                   <ButtonGroup variant="contained" color="secondary">
                     <Button
-                      onClick={() => copyToClipboard([messageObject], "JS")}
+                      onClick={() => copyToClipboard([messageObject], 'JS')}
                     >
                       JS
                     </Button>
                     <Button
-                      onClick={() => copyToClipboard([messageObject], "JSON")}
+                      onClick={() => copyToClipboard([messageObject], 'JSON')}
                     >
                       JSON
                     </Button>
                     <Button
-                      onClick={() => copyToClipboard([messageObject], "JSX")}
+                      onClick={() => copyToClipboard([messageObject], 'JSX')}
                     >
                       JSX
                     </Button>
